@@ -1,50 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!-- status log4j2内部日志级别 -->
+<configuration status="INFO">
+<!-- 全局参数 -->
+<Properties>
+    <Property name="displayName">logs/TestServer</Property>
+    <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+    <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+    <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+    <Property name="CONSOLE_LOG_PATTERN">%clr{%d{${sys:LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${sys:LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+    <Property name="FILE_LOG_PATTERN">%d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} %pid --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+</Properties>
+<Appenders>
+    <Console name="console" target="SYSTEM_OUT" follow="true">
+        <PatternLayout>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </PatternLayout>
+    </Console>
+    <!-- 文件 每次运行程序会自动清空，由append属性决定 -->
+    <File name="error" fileName="${displayName}_error.log" append="false">
+        <!-- 指定error 级别的日志 -->
+        <ThresholdFilter level="ERROR" onMatch="ACCEPT"
+                         onMismatch="DENY" />
+        <PatternLayout>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </PatternLayout>
+    </File>
+    <!-- 滚动文件 -->
+    <RollingFile name="rollingFile" fileName="${displayName}.log"
+                 filePattern="${displayName}_%d{yyyy-MM-dd}.log">
+        <PatternLayout>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </PatternLayout>
+        <!-- 按大小划分 -->
+        <SizeBasedTriggeringPolicy size="50 MB" />
+    </RollingFile>
+</Appenders>
+<Loggers>
+    <!-- <Logger name="org.apache.catalina.util.LifecycleBase" level="ERROR"
+        /> <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="WARN"
+        /> <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN"
+        /> -->
+    <Logger name="org.springframework" level="WARN" />
+    <AsyncRoot level="info" includeLocation="true">
+        <AppenderRef ref="console"/>
+        <AppenderRef ref="error" />
+        <AppenderRef ref="rollingFile" />
+    </AsyncRoot>
+</Loggers>
+</configuration>
 
-    <Properties>
-        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
-        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
-        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
-    </Properties>
-
-    <Appenders>
-        <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="%clr{%d{${sys:LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${sys:LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}"/>
-        </Console>
-
-        <RollingFile immediateFlush="false"  name="ErrorFile" fileName="logs/tomcatlogs/error.log"
-                     filePattern="logs/tomcatlogs/$${date:yyyy-MM}/error-%d{MM-dd-yyyy}-%i.log">
-            <Filters>
-                <ThresholdFilter level="INFO" />
-            </Filters>
-            <PatternLayout>
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%file:%line] %-5level %logger{35} - %msg %n</Pattern>
-            </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="102400KB"/>
-            </Policies>
-        </RollingFile>
-
-        <RollingFile immediateFlush="false"  name="BusinessFile" fileName="logs/tomcatlogs/bussiness.log"
-                     filePattern="logs/tomcatlogs/$${date:yyyy-MM}/bussiness-%d{MM-dd-yyyy}-%i.log">
-            <PatternLayout>
-                <Pattern>%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{%pid}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD}</Pattern>
-            </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="102400KB"/>
-            </Policies>
-        </RollingFile>
-
-    </Appenders>
-    <Loggers>
-        <AsyncLogger name="BusinessFile" level="info" additivity="false">
-            <appender-ref ref="BusinessFile"/>
-        </AsyncLogger>
-        <AsyncRoot level="info" includeLocation="true">
-            <AppenderRef ref="STDOUT"/>
-            <AppenderRef ref="ErrorFile" />
-        </AsyncRoot>
-    </Loggers>
-</Configuration>
