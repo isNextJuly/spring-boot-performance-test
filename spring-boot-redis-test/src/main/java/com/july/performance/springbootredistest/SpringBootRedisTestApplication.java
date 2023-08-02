@@ -4,11 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.async.AsyncLoggerContextSelector;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.util.Assert;
 
 /** @author july */
 @SpringBootApplication
 @Slf4j
+@EnableRedisRepositories
 public class SpringBootRedisTestApplication {
 
   static {
